@@ -7,8 +7,7 @@ const path = require('path');
 const fs = require('fs');
 
 // Build the full path to centers.json in the public folder.
-const centersPath = path.join(__dirname, 'centers.json');
-
+const centersPath = path.join(__dirname, 'public', 'centers.json');
 // Synchronously read and parse the JSON file.
 const centers = JSON.parse(fs.readFileSync(centersPath, 'utf-8'));
 
