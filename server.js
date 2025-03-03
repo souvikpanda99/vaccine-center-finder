@@ -3,9 +3,18 @@ const express = require('express');
 const app = express();
 const port = 3000;
 
+const path = require('path');
+const fs = require('fs');
+
+// Build the full path to centers.json in the public folder.
+const centersPath = path.join(__dirname, 'centers.json');
+
+// Synchronously read and parse the JSON file.
+const centers = JSON.parse(fs.readFileSync(centersPath, 'utf-8'));
+
 // For demonstration, we simulate the vaccine centers dataset.
 // In production, you could load data generated from your C++ R-tree build.
-const centers = require('./centers.json'); // assume centers.json contains our 100K centers
+// const centers = require('./centers.json'); // assume centers.json contains our 100K centers
 
 // Simple k-nearest neighbor search (using Euclidean distance).
 // In a real-world scenario, you’d use your pre-built R-tree index.
