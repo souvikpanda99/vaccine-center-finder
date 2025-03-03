@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Vaccine Centers Map</title>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+  />
+  <style>
+    #map {
+      height: 600px;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Vaccine Centers Map</h1>
+  <div>
+    <label>
+      <input type="checkbox" id="toggleAll" />
+      Show All Vaccine Centers
+    </label>
+  </div>
+  <div style="margin:10px 0;">
+    <label>
+      Latitude: <input type="text" id="lat" placeholder="e.g., 34.0" />
+    </label>
+    <label>
+      Longitude: <input type="text" id="lon" placeholder="e.g., -118.0" />
+    </label>
+    <label>
+      K Nearest: <input type="number" id="k" value="3" min="1" />
+    </label>
+    <button id="findNearest">Find Nearest</button>
+  </div>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script>
+    // Initialize the map centered at a default location.
+    const map = L.map('map').setView([34.0, -118.0], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(map);
+
+    let allMarkers = [];
+    let nearestMarkers = [];
+    let userMarker = null; // Marker for the user location
+
+    function addMarkers(data, markersArray, color) {
+      data.forEach(center => {
+        const marker = L.circleMarker([center.lat, center.lon], { 
+          color: color,
+          radius: 5 
+        }).bindPopup("ID: " + center.id + "<br>Distance: " + (center.distance ? center.distance.toFixed(2) : "N/A"));
+        marker.addTo(map);
+        markersArray.push(marker);
+      });
+    }
+
+    function clearMarkers(markersArray) {
+      markersArray.forEach(marker => map.removeLayer(marker));
+      markersArray.length = 0;
+    }
+
+    // Toggle showing all vaccine centers.
+    document.getElementById("toggleAll").addEventListener("change", function() {
+      if (this.checked) {
+        fetch('/centers')
+          .then(response => response.json())
+          .then(data => {
+            addMarkers(data, allMarkers, 'blue');
+          });
+      } else {
+        clearMarkers(allMarkers);
+      }
+    });
+
+    // Handle nearest neighbor search and show user location in a different color.
+    document.getElementById("findNearest").addEventListener("click", function() {
+      const lat = parseFloat(document.getElementById("lat").value);
+      const lon = parseFloat(document.getElementById("lon").value);
+      const k = document.getElementById("k").value;
+      clearMarkers(nearestMarkers);
+      
+      // Place a marker for the user location in green.
+      if (userMarker) {
+        map.removeLayer(userMarker);
+      }
+      userMarker = L.circleMarker([lat, lon], {
+        color: 'green',
+        radius: 7,
+        fillOpacity: 0.8
+      }).bindPopup("Your Location");
+      userMarker.addTo(map);
+
+      fetch(`/nearest?lat=${lat}&lon=${lon}&k=${k}`)
+        .then(response => response.json())
+        .then(data => {
+          addMarkers(data, nearestMarkers, 'red');
+        });
+    });
+  </script>
+</body>
+</html>
