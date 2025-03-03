@@ -70,7 +70,7 @@
     // Toggle showing all vaccine centers.
     document.getElementById("toggleAll").addEventListener("change", function() {
       if (this.checked) {
-        fetch('/centers')
+        fetch('/centers.json')
           .then(response => response.json())
           .then(data => {
             addMarkers(data, allMarkers, 'blue');
