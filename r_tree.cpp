@@ -3,7 +3,12 @@
 #include <queue>
 #include <algorithm>
 #include <cmath>
-#include <random>
+#include <random> 
+#include <fstream>
+#include "json.hpp"  // Include the nlohmann/json header
+
+using json = nlohmann::json;
+
 
 // Structure representing a vaccine center (using lat as y and lon as x)
 struct VaccineCenter {
@@ -183,11 +188,34 @@ private:
     }
 };
 
+std::vector<VaccineCenter> loadCenters(const std::string& filename) {
+    std::vector<VaccineCenter> centers;
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Error: Could not open " << filename << std::endl;
+        return centers;
+    }
+
+    json j;
+    file >> j;
+    for (const auto& item : j) {
+        VaccineCenter center;
+        center.lat = item["lat"].get<double>();
+        center.lon = item["lon"].get<double>();
+        center.id  = item["id"].get<int>();
+        centers.push_back(center);
+    }
+    return centers;
+}
+
+
 //--------------------------
 // Main: Generate 100,000 Centers with 100 Clusters and Sample Usage
 //--------------------------
 int main() {
     const int totalCenters = 100000;
+    const int numClusters = 100;
+    /*const int totalCenters = 100000;
     const int numClusters = 100;
     std::vector<VaccineCenter> centers;
     centers.reserve(totalCenters);
@@ -222,7 +250,9 @@ int main() {
         double lat = clusterCenters[0].first + offsetDist(gen);
         double lon = clusterCenters[0].second + offsetDist(gen);
         centers.push_back({ lat, lon, idCounter++ });
-    }
+    }*/
+
+    std::vector<VaccineCenter> centers = loadCenters("public/centers.json");
 
     std::cout << "Generated " << centers.size() << " vaccine centers across " << numClusters << " clusters." << std::endl;
 
