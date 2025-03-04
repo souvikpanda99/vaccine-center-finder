@@ -98,7 +98,7 @@
       }).bindPopup("Your Location");
       userMarker.addTo(map);
 
-      fetch(`/nearest?lat=${lat}&lon=${lon}&k=${k}`)
+      fetch(`/api/nearest?lat=${lat}&lon=${lon}&k=${k}`)
         .then(response => response.json())
         .then(data => {
           addMarkers(data, nearestMarkers, 'red');
