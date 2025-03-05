@@ -1,14 +1,16 @@
 // server.js
+import express from 'express'
+import centersHandler from './api/centers.js';
+import nearestHandler from './api/nearest.js';
 
-const express = require('express');
 const app = express();
 const port = 3001;
 
 // Serve static files (frontend) from "public" directory.
 app.use(express.static('public'));
 
-app.use('/api/centers', require('./api/centers'));
-app.use('/api/nearest', require('./api/nearest'));
+app.use('/api/centers', centersHandler);
+app.use('/api/nearest', nearestHandler);
 
 // Start local development server
 app.listen(port, () => {
